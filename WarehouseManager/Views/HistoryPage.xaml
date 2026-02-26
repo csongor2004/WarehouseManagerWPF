@@ -8,8 +8,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Tranzakciós Előzmények" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" Foreground="#2C3E50"/>
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
+            <TextBlock Grid.Column="0" Text="🕒 Tranzakciós Előzmények" FontSize="24" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+
+            <DatePicker Grid.Column="1" SelectedDate="{Binding HistoryDateFilter, UpdateSourceTrigger=PropertyChanged}" 
+                Width="150" Height="35" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+
+            <Button Grid.Column="2" Content="Szűrő Törlése" Command="{Binding ClearHistoryFilterCommand}" 
+            Background="#E2E8F0" Foreground="#475569" FontWeight="SemiBold" Padding="15,0" BorderThickness="0" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </Grid>
         <DataGrid Grid.Row="1" ItemsSource="{Binding OrdersHistory}" AutoGenerateColumns="False" 
                   CanUserAddRows="False" Background="White" RowHeight="35" IsReadOnly="True">
             <DataGrid.Columns>

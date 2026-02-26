@@ -33,6 +33,32 @@ namespace WarehouseManager.ViewModels
         public RelayCommand DeleteProductCommand { get; }
         public RelayCommand ExportCsvCommand { get; }
         public RelayCommand EditProductCommand { get; }
+        
+        private ObservableCollection<Category> _categoriesList;
+        public ObservableCollection<Category> CategoriesList { get => _categoriesList; set { _categoriesList = value; OnPropertyChanged(); } }
+
+        private Category _selectedCategory;
+        public Category SelectedCategory { get => _selectedCategory; set { _selectedCategory = value; OnPropertyChanged(); } }
+
+        private string _newCategoryName;
+        public string NewCategoryName { get => _newCategoryName; set { _newCategoryName = value; OnPropertyChanged(); } }
+
+        public RelayCommand NavCategoriesCommand { get; }
+        public RelayCommand AddCategoryCommand { get; }
+        public RelayCommand DeleteCategoryCommand { get; }
+
+        private System.DateTime? _historyDateFilter;
+        public System.DateTime? HistoryDateFilter
+        {
+            get => _historyDateFilter;
+            set { _historyDateFilter = value; OnPropertyChanged(); ApplyHistoryFilter(); }
+        }
+
+        
+        private ObservableCollection<Order> _allOrders;
+        private string _barcodeText;
+        public string BarcodeText { get => _barcodeText; set { _barcodeText = value; OnPropertyChanged(); } }
+        public RelayCommand ProcessBarcodeCommand { get; }
         public RelayCommand NavStatsCommand { get; }
         private ObservableCollection<Product> _cartItems = new ObservableCollection<Product>();
         public ObservableCollection<Product> CartItems { get => _cartItems; set { _cartItems = value; OnPropertyChanged(); } }
@@ -68,6 +94,11 @@ namespace WarehouseManager.ViewModels
 
         
         public string CurrentUserName => Helpers.SessionManager.CurrentUser?.Username?.ToUpper() ?? "VENDÉG";
+        private User _selectedUser;
+        public User SelectedUser { get => _selectedUser; set { _selectedUser = value; OnPropertyChanged(); } }
+
+        public RelayCommand PromoteUserCommand { get; }
+        public RelayCommand DemoteUserCommand { get; }
         public MainViewModel()
         {
             LoadData();
@@ -87,18 +118,41 @@ namespace WarehouseManager.ViewModels
             NavHistoryCommand = new RelayCommand(o => CurrentPage = new HistoryPage { DataContext = this });
             LogoutCommand = new RelayCommand(Logout);
             NavUsersCommand = new RelayCommand(o => { CurrentPage = new UsersPage { DataContext = this }; LoadUsers(); });
+            NavCategoriesCommand = new RelayCommand(o => { CurrentPage = new Views.CategoryPage { DataContext = this }; LoadCategories(); });
+            AddCategoryCommand = new RelayCommand(o => AddCategory());
+            DeleteCategoryCommand = new RelayCommand(o => DeleteCategory(), o => SelectedCategory != null);
+            ProcessBarcodeCommand = new RelayCommand(o => ProcessBarcode());
+            PromoteUserCommand = new RelayCommand(o => ChangeUserRole("Admin"), o => SelectedUser != null);
+            DemoteUserCommand = new RelayCommand(o => ChangeUserRole("User"), o => SelectedUser != null);
         }
 
         public void LoadData()
         {
             using (var db = new AppDbContext())
             {
-                var list = db.Products.Include(p => p.Category).ToList();
-                _allProducts = new ObservableCollection<Product>(list);
-                ApplyFilter(); 
+                var orderList = db.Orders.OrderByDescending(o => o.OrderDate).ToList();
+                _allOrders = new ObservableCollection<Order>(orderList);
+                ApplyHistoryFilter();
+            }
+        }
+        private void ApplyHistoryFilter()
+        {
+            if (_allOrders == null) return;
+
+            if (HistoryDateFilter.HasValue)
+            {
+                
+                var filtered = _allOrders.Where(o => o.OrderDate.Date == HistoryDateFilter.Value.Date);
+                OrdersHistory = new ObservableCollection<Order>(filtered);
+            }
+            else
+            {
+                OrdersHistory = new ObservableCollection<Order>(_allOrders);
             }
         }
 
+        
+        public RelayCommand ClearHistoryFilterCommand => new RelayCommand(o => HistoryDateFilter = null);
         private void ApplyFilter()
         {
             if (string.IsNullOrWhiteSpace(SearchText))
@@ -201,7 +255,85 @@ namespace WarehouseManager.ViewModels
                 UsersList = new ObservableCollection<User>(db.Users.ToList());
             }
         }
+        public void LoadCategories()
+        {
+            using (var db = new AppDbContext())
+            {
+                CategoriesList = new ObservableCollection<Category>(db.Categories.ToList());
+            }
+        }
 
+        private void AddCategory()
+        {
+            if (string.IsNullOrWhiteSpace(NewCategoryName)) return;
+            using (var db = new AppDbContext())
+            {
+                db.Categories.Add(new Category { Name = NewCategoryName });
+                db.SaveChanges();
+            }
+            NewCategoryName = string.Empty; 
+            LoadCategories();
+        }
+
+        private void DeleteCategory()
+        {
+            if (SelectedCategory == null) return;
+            try
+            {
+                using (var db = new AppDbContext())
+                {
+                    db.Categories.Remove(SelectedCategory);
+                    db.SaveChanges();
+                }
+                LoadCategories();
+            }
+            catch
+            {
+                
+                System.Windows.MessageBox.Show("Ezt a kategóriát nem törölheted, mert már tartozik hozzá termék a raktárban!");
+            }
+        }
+
+        private void ProcessBarcode()
+        {
+            if (string.IsNullOrWhiteSpace(BarcodeText)) return;
+
+            
+            var product = Products?.FirstOrDefault(p => p.SKU.Equals(BarcodeText, System.StringComparison.OrdinalIgnoreCase));
+
+            if (product != null)
+            {
+                AddToCart(product); 
+            }
+            else
+            {
+                System.Windows.MessageBox.Show($"Nincs ilyen vonalkódú (SKU) termék a rendszerben: {BarcodeText}");
+            }
+
+            BarcodeText = string.Empty; 
+        }
+        private void ChangeUserRole(string newRole)
+        {
+            if (SelectedUser == null) return;
+
+            // Nem veheted el a saját admin jogodat véletlenül!
+            if (SelectedUser.Id == Helpers.SessionManager.CurrentUser.Id && newRole == "User")
+            {
+                MessageBox.Show("Saját magadtól nem veheted el az Admin jogot!");
+                return;
+            }
+
+            using (var db = new AppDbContext())
+            {
+                var dbUser = db.Users.FirstOrDefault(u => u.Id == SelectedUser.Id);
+                if (dbUser != null)
+                {
+                    dbUser.Role = newRole;
+                    db.SaveChanges();
+                }
+            }
+            LoadUsers(); // Lista frissítése a felületen
+        }
         private void Checkout()
         {
             if (System.Windows.MessageBox.Show($"Biztosan kifizeted? Összeg: {CartTotal:N0} Ft", "Fizetés", System.Windows.MessageBoxButton.YesNo) == System.Windows.MessageBoxResult.Yes)

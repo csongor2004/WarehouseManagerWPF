@@ -61,7 +61,33 @@
                 <StackPanel>
                     <Button Content="🏠 Vezérlőpult" Command="{Binding NavDashboardCommand}" Style="{StaticResource MenuButton}"/>
                     <Button Content="📦 Raktárkészlet" Command="{Binding NavInventoryCommand}" Style="{StaticResource MenuButton}"/>
-                    <Button Content="💳 Értékesítés (POS)" Command="{Binding NavSalesCommand}" Style="{StaticResource MenuButton}"/>
+                    <TextBlock DockPanel.Dock="Top" Text="Elérhető Termékek" FontSize="20" FontWeight="Bold" Margin="0,0,0,15" Foreground="#2C3E50"/>
+
+                    <Border DockPanel.Dock="Top" Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="2" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="📠 Vonalkód (SKU) leolvasása:" FontWeight="Bold" Foreground="#1D4ED8" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding BarcodeText, UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" Padding="10" FontSize="16">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding ProcessBarcodeCommand}"/>
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+
+                    <DataGrid ItemsSource="{Binding Products}" ... >```
+
+---
+
+### 4. Gomb a Főmenübe (MainWindow.xaml)
+Végül, hogy elérjük az új Kategóriák oldalt, nyisd meg a `MainWindow.xaml` fájlt, és a bal oldali sötét menübe, a Raktárkészlet alá tedd be az új gombot, ami szintén csak Adminnak látható:
+
+```xml
+                        <Button Content="📁 Kategóriák" Command="{Binding NavCategoriesCommand}" Style="{StaticResource MenuButton}" Visibility="{Binding AdminVisibility}"/>
+                        <Button Content="💳 Értékesítés (POS)" Command="{Binding NavSalesCommand}" Style="{StaticResource MenuButton}"/>
                     <Button Content="🕒 Tranzakciók" Command="{Binding NavHistoryCommand}" Style="{StaticResource MenuButton}" Visibility="{Binding AdminVisibility}"/>
                     <Button Content="📊 Statisztika" Command="{Binding NavStatsCommand}" Style="{StaticResource MenuButton}" Visibility="{Binding AdminVisibility}"/>
                     <Button Content="👥 Felhasználók" Command="{Binding NavUsersCommand}" Style="{StaticResource MenuButton}" Visibility="{Binding AdminVisibility}"/>

@@ -13,7 +13,30 @@
             <Border.Effect>
                 <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05"/>
             </Border.Effect>
-            <TextBlock Text="Dolgozók és Jogosultságok" FontSize="22" FontWeight="Bold" Foreground="#1E293B"/>
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text="Dolgozók és Jogosultságok" FontSize="22" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="⬆️ Kinevezés Adminná" Command="{Binding PromoteUserCommand}" Background="#3B82F6" Foreground="White" FontWeight="Bold" Padding="15,8" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Content="⬇️ Jogosultság elvétele" Command="{Binding DemoteUserCommand}" Background="#64748B" Foreground="White" FontWeight="Bold" Padding="15,8" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
         </Border>
 
         <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="10">

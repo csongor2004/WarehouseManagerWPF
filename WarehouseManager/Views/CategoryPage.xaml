@@ -1,0 +1,64 @@
+﻿<Page x:Class="WarehouseManager.Views.CategoryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Kategóriák">
+    <Grid Margin="30">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="White" CornerRadius="12" Padding="25" Margin="0,0,15,0" VerticalAlignment="Top">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
+            <StackPanel>
+                <TextBlock Text="📁 Új Kategória" FontSize="20" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,20"/>
+
+                <TextBlock Text="Kategória megnevezése" FontWeight="SemiBold" Foreground="#475569" Margin="0,0,0,5"/>
+                <Border Background="#F1F5F9" CornerRadius="8" Padding="15" Margin="0,0,0,20">
+                    <TextBox Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="14"/>
+                </Border>
+
+                <Button Content="HOZZÁADÁS" Command="{Binding AddCategoryCommand}" Background="#10B981" Foreground="White" FontWeight="Bold" Height="45" Cursor="Hand" BorderThickness="0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Background="White" CornerRadius="12" Padding="20" Margin="15,0,0,0">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,15">
+                    <TextBlock Text="Rendszerezett Kategóriák" FontSize="20" FontWeight="Bold" Foreground="#1E293B"/>
+                    <Button Content="Kijelölt Törlése" Command="{Binding DeleteCategoryCommand}" HorizontalAlignment="Right" Background="#EF4444" Foreground="White" FontWeight="Bold" Padding="15,8" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DockPanel>
+
+                <DataGrid ItemsSource="{Binding CategoriesList}" SelectedItem="{Binding SelectedCategory}" 
+                          AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" 
+                          Background="White" BorderThickness="0" RowHeight="45" GridLinesVisibility="None" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="80"/>
+                        <DataGridTextColumn Header="MEGNEVEZÉS" Binding="{Binding Name}" Width="*" FontWeight="SemiBold"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Page>
