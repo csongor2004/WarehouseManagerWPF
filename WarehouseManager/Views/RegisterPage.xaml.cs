@@ -31,7 +31,8 @@ namespace WarehouseManager.Views
                 var newUser = new User
                 {
                     Username = txtRegUsername.Text,
-                    PasswordHash = SecurityHelper.HashPassword(txtRegPassword.Password)
+                    PasswordHash = SecurityHelper.HashPassword(txtRegPassword.Password),
+                    Role = "User" 
                 };
 
                 db.Users.Add(newUser);
@@ -39,7 +40,7 @@ namespace WarehouseManager.Views
             }
 
             MessageBox.Show("Sikeres regisztráció! Most már bejelentkezhetsz.");
-            // Visszaugrás a Login Page-re
+            
             NavigationService.GoBack();
         }
 

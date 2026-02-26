@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
+using System.Drawing.Interop;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -15,7 +16,14 @@ namespace WarehouseManager.ViewModels
     {
         private object _currentPage;
         private Product _selectedProduct;
+        private ObservableCollection<Product> _allProducts;
+        private string _searchText;
 
+        public string SearchText
+        {
+            get => _searchText;
+            set { _searchText = value; OnPropertyChanged(); ApplyFilter(); }
+        }
         public object CurrentPage { get => _currentPage; set { _currentPage = value; OnPropertyChanged(); } }
         public ObservableCollection<Product> Products { get; set; }
         public Product SelectedProduct { get => _selectedProduct; set { _selectedProduct = value; OnPropertyChanged(); } }
@@ -40,6 +48,17 @@ namespace WarehouseManager.ViewModels
         public RelayCommand AddToCartCommand { get; }
         public RelayCommand CheckoutCommand { get; }
         public RelayCommand ClearCartCommand { get; }
+        public RelayCommand LogoutCommand { get; }
+        public RelayCommand NavUsersCommand { get; }
+
+        private ObservableCollection<User> _usersList;
+        public ObservableCollection<User> UsersList { get => _usersList; set { _usersList = value; OnPropertyChanged(); } }
+
+        public System.Windows.Visibility AdminVisibility =>
+            Helpers.SessionManager.IsAdmin ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+
+        
+        public string CurrentUserName => Helpers.SessionManager.CurrentUser?.Username?.ToUpper() ?? "VENDÉG";
         public MainViewModel()
         {
             LoadData();
@@ -57,22 +76,34 @@ namespace WarehouseManager.ViewModels
             CheckoutCommand = new RelayCommand(o => Checkout(), o => CartItems.Count > 0);
             ClearCartCommand = new RelayCommand(o => { CartItems.Clear(); CalculateTotal(); });
             NavHistoryCommand = new RelayCommand(o => CurrentPage = new HistoryPage { DataContext = this });
+            LogoutCommand = new RelayCommand(Logout);
+            NavUsersCommand = new RelayCommand(o => { CurrentPage = new UsersPage { DataContext = this }; LoadUsers(); });
         }
 
         public void LoadData()
         {
             using (var db = new AppDbContext())
             {
-                // Meglévő termék betöltés...
                 var list = db.Products.Include(p => p.Category).ToList();
-                Products = new ObservableCollection<Product>(list);
-                OnPropertyChanged(nameof(Products));
-
-                // ÚJ: Rendelések betöltése (Legújabb elöl)
-                var orderList = db.Orders.OrderByDescending(o => o.OrderDate).ToList();
-                OrdersHistory = new ObservableCollection<Order>(orderList);
-                OnPropertyChanged(nameof(OrdersHistory));
+                _allProducts = new ObservableCollection<Product>(list);
+                ApplyFilter(); 
             }
+        }
+
+        private void ApplyFilter()
+        {
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                Products = new ObservableCollection<Product>(_allProducts);
+            }
+            else
+            {
+                
+                Products = new ObservableCollection<Product>(_allProducts.Where(p =>
+                    p.Name.ToLower().Contains(SearchText.ToLower()) ||
+                    p.SKU.ToLower().Contains(SearchText.ToLower())));
+            }
+            OnPropertyChanged(nameof(Products));
         }
 
         private void OpenAddDialog()
@@ -134,7 +165,29 @@ namespace WarehouseManager.ViewModels
             CartTotal = CartItems.Sum(p => p.Price);
         }
 
+        private void Logout(object parameter)
+        {
+            
+            Helpers.SessionManager.CurrentUser = null;
 
+            
+            var authWindow = new Views.AuthWindow();
+            authWindow.Show();
+
+           
+            if (parameter is Window window)
+            {
+                window.Close();
+            }
+        }
+
+        public void LoadUsers()
+        {
+            using (var db = new AppDbContext())
+            {
+                UsersList = new ObservableCollection<User>(db.Users.ToList());
+            }
+        }
 
         private void Checkout()
         {
@@ -142,7 +195,7 @@ namespace WarehouseManager.ViewModels
             {
                 using (var db = new Data.AppDbContext())
                 {
-                    // 1. Létrehozzuk az új rendelést
+                   
                     var newOrder = new Models.Order
                     {
                         OrderDate = System.DateTime.Now,
@@ -150,20 +203,20 @@ namespace WarehouseManager.ViewModels
                     };
                     db.Orders.Add(newOrder);
 
-                    // A kosár tartalmának csoportosítása (ha egy termékből többet is beletett)
+                    
                     var groupedCart = CartItems.GroupBy(p => p.Id)
                                                .Select(g => new { Product = g.First(), Quantity = g.Count() });
 
                     foreach (var item in groupedCart)
                     {
-                        // 2. Készlet levonása
+                        
                         var dbProduct = db.Products.FirstOrDefault(p => p.Id == item.Product.Id);
                         if (dbProduct != null && dbProduct.StockLevel >= item.Quantity)
                         {
                             dbProduct.StockLevel -= item.Quantity;
                         }
 
-                        // 3. Rendelési tétel (OrderItem) mentése
+                        
                         var orderItem = new Models.OrderItem
                         {
                             Order = newOrder,
@@ -175,10 +228,10 @@ namespace WarehouseManager.ViewModels
                         db.OrderItems.Add(orderItem);
                     }
 
-                    db.SaveChanges(); // Mentés az adatbázisba
+                    db.SaveChanges(); 
                 }
 
-                // Itt hívod meg a korábbi PDF generálást (ReceiptService.GeneratePdfReceipt...)
+                
                 try
                 {
                     Services.ReceiptService.GeneratePdfReceipt(CartItems, CartTotal);

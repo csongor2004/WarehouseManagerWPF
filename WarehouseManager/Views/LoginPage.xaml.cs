@@ -22,11 +22,11 @@ namespace WarehouseManager.Views
 
                 if (user != null)
                 {
-                    // Sikeres belépés: Megnyitjuk a főablakot
+                    
+                    SessionManager.CurrentUser = user;
+
                     var mainWindow = new MainWindow();
                     mainWindow.Show();
-
-                    // Bezárjuk a befogadó AuthWindow-t
                     Window.GetWindow(this)?.Close();
                 }
                 else
@@ -38,7 +38,7 @@ namespace WarehouseManager.Views
 
         private void Register_Click(object sender, RoutedEventArgs e)
         {
-            // Navigálás a Regisztráció Page-re a Frame-en belül
+            
             NavigationService.Navigate(new RegisterPage());
         }
     }

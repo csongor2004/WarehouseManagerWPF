@@ -2,51 +2,118 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Title="Raktárkészlet">
-    <Grid Margin="20">
+
+    <Page.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8FAFC"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="RowHeight" Value="45"/>
+        </Style>
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="#F1F5F9"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#475569"/>
+            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+        </Style>
+        <Style TargetType="DataGridRow">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E0F2FE"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <UniformGrid Grid.Row="0" Columns="3" Margin="0,0,0,20">
-            <Border Background="White" Margin="5" Padding="15" CornerRadius="8">
-                <StackPanel>
-                    <TextBlock Text="Összes termék" Foreground="Gray"/>
-                    <TextBlock Text="{Binding Products.Count}" FontSize="24" FontWeight="Bold"/>
-                </StackPanel>
-            </Border>
-            <Border Background="White" Margin="5" Padding="15" CornerRadius="8">
-                <StackPanel>
-                    <TextBlock Text="Raktár érték" Foreground="Gray"/>
-                    <TextBlock Text="Aktív" FontSize="24" FontWeight="Bold" Foreground="#27AE60"/>
-                </StackPanel>
-            </Border>
-            <Border Background="White" Margin="5" Padding="15" CornerRadius="8">
-                <StackPanel>
-                    <TextBlock Text="Alacsony készlet" Foreground="Gray"/>
-                    <TextBlock Text="Figyelés bekapcsolva" FontSize="18" FontWeight="SemiBold" Foreground="#E74C3C"/>
-                </StackPanel>
-            </Border>
-        </UniformGrid>
-        <DockPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBox Width="250" VerticalContentAlignment="Center" Padding="5" Tag="Keresés..."/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="+ Új Termék" Command="{Binding AddProductCommand}" Background="#27AE60" Foreground="White" Padding="15,5"/>
-                <Button Content="Törlés" Command="{Binding DeleteProductCommand}" Background="#E74C3C" Foreground="White" Margin="10,0,0,0" Padding="15,5"/>
-            </StackPanel>
-        </DockPanel>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
-          AutoGenerateColumns="False" CanUserAddRows="False" Background="White" RowHeight="40">
+        <Border Grid.Row="0" Background="White" CornerRadius="12" Padding="20" Margin="0,0,0,20">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
 
-            <DataGrid.InputBindings>
-                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditProductCommand}"/>
-            </DataGrid.InputBindings>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="SKU" Binding="{Binding SKU}" Width="100"/>
-                <DataGridTextColumn Header="Név" Binding="{Binding Name}" Width="*"/>
-                <DataGridTextColumn Header="Készlet" Binding="{Binding StockLevel}" Width="80"/>
-                <DataGridTextColumn Header="Ár" Binding="{Binding Price, StringFormat={}{0:N0} Ft}" Width="120"/>
-            </DataGrid.Columns>
-        </DataGrid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Termékleltár" FontSize="22" FontWeight="Bold" Foreground="#1E293B"/>
+                    <TextBlock Text="Kezeld a raktárkészletet és az árakat" Foreground="#64748B" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+
+                    <Border Background="#F1F5F9" CornerRadius="8" Margin="0,0,15,0" Width="250" Height="40">
+                        <Grid>
+                            <TextBlock Text="🔍 Keresés..." Foreground="#94A3B8" VerticalAlignment="Center" Margin="15,0,0,0" IsHitTestVisible="False">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text.Length, ElementName=searchBox}" Value="0">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <TextBox x:Name="searchBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                     Background="Transparent" BorderThickness="0" VerticalAlignment="Center" Padding="15,0,10,0" FontSize="14"/>
+                        </Grid>
+                    </Border>
+
+                    <Button Content="+ ÚJ TERMÉK" Command="{Binding AddProductCommand}" Visibility="{Binding AdminVisibility}"
+            Background="#10B981" Foreground="White" FontWeight="Bold" Width="120" Height="40" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Button Content="TÖRLÉS" Command="{Binding DeleteProductCommand}" Visibility="{Binding AdminVisibility}"
+            Background="#EF4444" Foreground="White" FontWeight="Bold" Width="90" Height="40" BorderThickness="0" Margin="10,0,0,0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Background="White" CornerRadius="12" Padding="10">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
+            <DataGrid ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
+                <DataGrid.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditProductCommand}"/>
+                </DataGrid.InputBindings>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="SKU" Binding="{Binding SKU}" Width="120" FontWeight="SemiBold"/>
+                    <DataGridTextColumn Header="TERMÉKNÉV" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="KÉSZLET" Binding="{Binding StockLevel}" Width="100"/>
+                    <DataGridTextColumn Header="EGYSÉGÁR" Binding="{Binding Price, StringFormat={}{0:N0} Ft}" Width="150"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
     </Grid>
 </Page>

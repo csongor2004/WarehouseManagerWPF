@@ -14,11 +14,11 @@ using System.Windows.Shapes;
 namespace WarehouseManager.Views
 {
     /// <summary>
-    /// Interaction logic for Page1.xaml
+    /// Interaction logic for UsersPage.xaml
     /// </summary>
-    public partial class SalesPage : Page
+    public partial class UsersPage : Page
     {
-        public SalesPage()
+        public UsersPage()
         {
             InitializeComponent();
         }
