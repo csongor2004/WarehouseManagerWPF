@@ -23,17 +23,21 @@ namespace WarehouseManager.ViewModels
         public RelayCommand AddProductCommand { get; }
         public RelayCommand DeleteProductCommand { get; }
         public RelayCommand ExportCsvCommand { get; }
+        public RelayCommand EditProductCommand { get; }
+        public RelayCommand NavStatsCommand { get; }
 
         public MainViewModel()
         {
             LoadData();
-            // Az oldalaknak átadjuk magát a ViewModel-t (this), hogy lássák a Products listát
+            
             CurrentPage = new InventoryPage { DataContext = this };
 
             NavInventoryCommand = new RelayCommand(o => CurrentPage = new InventoryPage { DataContext = this });
             AddProductCommand = new RelayCommand(o => OpenAddDialog());
             DeleteProductCommand = new RelayCommand(o => Delete(), o => SelectedProduct != null);
             ExportCsvCommand = new RelayCommand(o => ExportToCsv());
+            EditProductCommand = new RelayCommand(o => EditProduct(), o => SelectedProduct != null);
+            NavStatsCommand = new RelayCommand(o => CurrentPage = new StatsPage { DataContext = this });
         }
 
         public void LoadData()
@@ -72,6 +76,17 @@ namespace WarehouseManager.ViewModels
             var lines = Products.Select(p => $"{p.SKU};{p.Name};{p.StockLevel};{p.Price}");
             File.WriteAllLines(path, lines);
             MessageBox.Show("Exportálva az asztalra!");
+        }
+        private void EditProduct()
+        {
+            if (SelectedProduct == null) return;
+
+           
+            var dialog = new EditProductWindow(SelectedProduct);
+            if (dialog.ShowDialog() == true)
+            {
+                LoadData(); 
+            }
         }
     }
 }

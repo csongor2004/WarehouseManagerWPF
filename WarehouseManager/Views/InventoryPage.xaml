@@ -36,7 +36,11 @@
         </DockPanel>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}"
-                  AutoGenerateColumns="False" CanUserAddRows="False" Background="White" RowHeight="40">
+          AutoGenerateColumns="False" CanUserAddRows="False" Background="White" RowHeight="40">
+
+            <DataGrid.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditProductCommand}"/>
+            </DataGrid.InputBindings>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="SKU" Binding="{Binding SKU}" Width="100"/>
                 <DataGridTextColumn Header="Név" Binding="{Binding Name}" Width="*"/>
