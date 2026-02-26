@@ -1,0 +1,7 @@
+﻿<Window x:Class="WarehouseManager.Views.AuthWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WMS Hitelesítés" Height="450" Width="350" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+
+    <Frame x:Name="AuthFrame" NavigationUIVisibility="Hidden"/>
+</Window>

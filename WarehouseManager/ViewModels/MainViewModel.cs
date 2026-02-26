@@ -25,7 +25,17 @@ namespace WarehouseManager.ViewModels
         public RelayCommand ExportCsvCommand { get; }
         public RelayCommand EditProductCommand { get; }
         public RelayCommand NavStatsCommand { get; }
+        private ObservableCollection<Product> _cartItems = new ObservableCollection<Product>();
+        public ObservableCollection<Product> CartItems { get => _cartItems; set { _cartItems = value; OnPropertyChanged(); } }
 
+        private decimal _cartTotal;
+        public decimal CartTotal { get => _cartTotal; set { _cartTotal = value; OnPropertyChanged(); } }
+
+       
+        public RelayCommand NavSalesCommand { get; }
+        public RelayCommand AddToCartCommand { get; }
+        public RelayCommand CheckoutCommand { get; }
+        public RelayCommand ClearCartCommand { get; }
         public MainViewModel()
         {
             LoadData();
@@ -38,6 +48,10 @@ namespace WarehouseManager.ViewModels
             ExportCsvCommand = new RelayCommand(o => ExportToCsv());
             EditProductCommand = new RelayCommand(o => EditProduct(), o => SelectedProduct != null);
             NavStatsCommand = new RelayCommand(o => CurrentPage = new StatsPage { DataContext = this });
+            NavSalesCommand = new RelayCommand(o => CurrentPage = new SalesPage { DataContext = this });
+            AddToCartCommand = new RelayCommand(AddToCart);
+            CheckoutCommand = new RelayCommand(o => Checkout(), o => CartItems.Count > 0);
+            ClearCartCommand = new RelayCommand(o => { CartItems.Clear(); CalculateTotal(); });
         }
 
         public void LoadData()
@@ -86,6 +100,51 @@ namespace WarehouseManager.ViewModels
             if (dialog.ShowDialog() == true)
             {
                 LoadData(); 
+            }
+        }
+        private void AddToCart(object param)
+        {
+            if (param is Product product)
+            {
+                if (product.StockLevel > 0)
+                {
+                    CartItems.Add(product);
+                    CalculateTotal();
+                }
+                else
+                {
+                    MessageBox.Show("Nincs elég készlet ebből a termékből!");
+                }
+            }
+        }
+
+        private void CalculateTotal()
+        {
+            CartTotal = CartItems.Sum(p => p.Price);
+        }
+
+        private void Checkout()
+        {
+            if (MessageBox.Show($"Biztosan kifizeted? Összeg: {CartTotal:N0} Ft", "Fizetés", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                using (var db = new AppDbContext())
+                {
+                    // Levonjuk a készletet az adatbázisban
+                    foreach (var item in CartItems)
+                    {
+                        var dbProduct = db.Products.FirstOrDefault(p => p.Id == item.Id);
+                        if (dbProduct != null && dbProduct.StockLevel > 0)
+                        {
+                            dbProduct.StockLevel -= 1;
+                        }
+                    }
+                    db.SaveChanges();
+                }
+
+                MessageBox.Show("Sikeres vásárlás!");
+                CartItems.Clear();
+                CalculateTotal();
+                LoadData(); // Frissítjük a bal oldali terméklistát
             }
         }
     }

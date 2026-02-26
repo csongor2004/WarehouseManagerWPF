@@ -16,6 +16,9 @@
 
                 <Button Content="📦 Raktárkészlet" Command="{Binding NavInventoryCommand}" 
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" Foreground="White" Padding="10" Margin="0,5"/>
+                <Button Content="💳 Értékesítés" Command="{Binding NavSalesCommand}" 
+        Foreground="White" Padding="10" Margin="0,5" 
+        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
                 <Button Content="📊 Statisztika" Foreground="White" Padding="10" Margin="0,5" 
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
                 <Button Content="📥 CSV Export" Command="{Binding ExportCsvCommand}" 

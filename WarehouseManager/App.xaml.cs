@@ -8,11 +8,14 @@ namespace WarehouseManager
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            using (var db = new AppDbContext())
+            using (var db = new Data.AppDbContext())
             {
-                
                 db.Database.EnsureCreated();
             }
+
+            
+            var authWindow = new Views.AuthWindow();
+            authWindow.Show();
         }
     }
 }
