@@ -84,7 +84,16 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-
+                    <Button Content="MÓDOSÍTÁS" Command="{Binding EditProductCommand}" Visibility="{Binding AdminVisibility}"
+        Background="#3B82F6" Foreground="White" FontWeight="Bold" Width="110" Height="40" BorderThickness="0" Margin="10,0,0,0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     <Button Content="TÖRLÉS" Command="{Binding DeleteProductCommand}" Visibility="{Binding AdminVisibility}"
             Background="#EF4444" Foreground="White" FontWeight="Bold" Width="90" Height="40" BorderThickness="0" Margin="10,0,0,0" Cursor="Hand">
                         <Button.Template>

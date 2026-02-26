@@ -14,7 +14,7 @@ namespace WarehouseManager.Views
             InitializeComponent();
             _productToEdit = product;
 
-            // Mezők feltöltése a kiválasztott termék adataival
+            // Amikor megnyílik az ablak, beírtjuk a meglévő adatokat a TextBox-okba
             txtName.Text = product.Name;
             txtSKU.Text = product.SKU;
             txtStock.Text = product.StockLevel.ToString();
@@ -27,7 +27,7 @@ namespace WarehouseManager.Views
             {
                 using (var db = new AppDbContext())
                 {
-                    // Megkeressük az adatbázisban a módosítandó sort
+                    // Megkeressük az adatbázisban az adott terméket, és felülírjuk az adatait
                     var p = db.Products.FirstOrDefault(x => x.Id == _productToEdit.Id);
                     if (p != null)
                     {
@@ -38,9 +38,9 @@ namespace WarehouseManager.Views
                         db.SaveChanges();
                     }
                 }
-                this.DialogResult = true; // Bezárja és jelzi a sikert
+                this.DialogResult = true; // Bezárja az ablakot, és jelzi, hogy sikeres volt
             }
-            catch { MessageBox.Show("Kérlek, ellenőrizd a számformátumokat!"); }
+            catch { MessageBox.Show("Hibás adatformátum! Kérjük, számokat adj meg a készlethez és az árhoz."); }
         }
     }
 }

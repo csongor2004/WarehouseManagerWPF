@@ -59,6 +59,7 @@
         Style="{StaticResource MenuButton}" Foreground="#EF4444" Margin="10,20"/>
 
                 <StackPanel>
+                    <Button Content="🏠 Vezérlőpult" Command="{Binding NavDashboardCommand}" Style="{StaticResource MenuButton}"/>
                     <Button Content="📦 Raktárkészlet" Command="{Binding NavInventoryCommand}" Style="{StaticResource MenuButton}"/>
                     <Button Content="💳 Értékesítés (POS)" Command="{Binding NavSalesCommand}" Style="{StaticResource MenuButton}"/>
                     <Button Content="🕒 Tranzakciók" Command="{Binding NavHistoryCommand}" Style="{StaticResource MenuButton}" Visibility="{Binding AdminVisibility}"/>

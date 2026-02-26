@@ -50,6 +50,15 @@ namespace WarehouseManager.ViewModels
         public RelayCommand ClearCartCommand { get; }
         public RelayCommand LogoutCommand { get; }
         public RelayCommand NavUsersCommand { get; }
+        
+        public RelayCommand NavDashboardCommand { get; }
+
+        public int TotalProductsCount => Products?.Count ?? 0;
+        public decimal TotalInventoryValue => Products?.Sum(p => p.Price * p.StockLevel) ?? 0;
+        public int LowStockCount => Products?.Count(p => p.StockLevel < 5) ?? 0;
+        public System.Collections.ObjectModel.ObservableCollection<Product> LowStockProducts =>
+            new System.Collections.ObjectModel.ObservableCollection<Product>(Products?.Where(p => p.StockLevel < 5) ?? new System.Collections.Generic.List<Product>());
+        
 
         private ObservableCollection<User> _usersList;
         public ObservableCollection<User> UsersList { get => _usersList; set { _usersList = value; OnPropertyChanged(); } }
@@ -62,9 +71,9 @@ namespace WarehouseManager.ViewModels
         public MainViewModel()
         {
             LoadData();
-            
-            CurrentPage = new InventoryPage { DataContext = this };
 
+            CurrentPage = new Views.DashboardPage { DataContext = this };
+            NavDashboardCommand = new RelayCommand(o => CurrentPage = new Views.DashboardPage { DataContext = this });
             NavInventoryCommand = new RelayCommand(o => CurrentPage = new InventoryPage { DataContext = this });
             AddProductCommand = new RelayCommand(o => OpenAddDialog());
             DeleteProductCommand = new RelayCommand(o => Delete(), o => SelectedProduct != null);
@@ -104,6 +113,10 @@ namespace WarehouseManager.ViewModels
                     p.SKU.ToLower().Contains(SearchText.ToLower())));
             }
             OnPropertyChanged(nameof(Products));
+            OnPropertyChanged(nameof(TotalProductsCount));
+            OnPropertyChanged(nameof(TotalInventoryValue));
+            OnPropertyChanged(nameof(LowStockCount));
+            OnPropertyChanged(nameof(LowStockProducts));
         }
 
         private void OpenAddDialog()
