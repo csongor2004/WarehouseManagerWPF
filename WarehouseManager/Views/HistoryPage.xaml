@@ -1,0 +1,29 @@
+﻿<Page x:Class="WarehouseManager.Views.HistoryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Előzmények" Background="#F4F7F9">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Tranzakciós Előzmények" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" Foreground="#2C3E50"/>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding OrdersHistory}" AutoGenerateColumns="False" 
+                  CanUserAddRows="False" Background="White" RowHeight="35" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Rendelés ID" Binding="{Binding Id}" Width="100"/>
+                <DataGridTextColumn Header="Dátum" Binding="{Binding OrderDate, StringFormat={}{0:yyyy. MM. dd. HH:mm}}" Width="160"/>
+                <DataGridTextColumn Header="Összeg" Binding="{Binding TotalAmount, StringFormat={}{0:N0} Ft}" Width="150">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Foreground" Value="#27AE60"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>
