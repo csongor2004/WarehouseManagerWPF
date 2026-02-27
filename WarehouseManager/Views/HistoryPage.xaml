@@ -36,6 +36,9 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Rendelés ID" Binding="{Binding Id}" Width="100"/>
                 <DataGridTextColumn Header="Dátum" Binding="{Binding OrderDate, StringFormat={}{0:yyyy. MM. dd. HH:mm}}" Width="160"/>
+
+                <DataGridTextColumn Header="Értékesítő" Binding="{Binding CashierName}" Width="*"/>
+
                 <DataGridTextColumn Header="Összeg" Binding="{Binding TotalAmount, StringFormat={}{0:N0} Ft}" Width="150">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">

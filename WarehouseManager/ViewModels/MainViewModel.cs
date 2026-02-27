@@ -128,10 +128,18 @@ namespace WarehouseManager.ViewModels
 
         public void LoadData()
         {
-            using (var db = new AppDbContext())
+            using (var db = new Data.AppDbContext())
             {
+                
+                var list = db.Products.Include(p => p.Category).ToList();
+                _allProducts = new ObservableCollection<Product>(list);
+                ApplyFilter();
+
+                
                 var orderList = db.Orders.OrderByDescending(o => o.OrderDate).ToList();
-                _allOrders = new ObservableCollection<Order>(orderList);
+                _allOrders = new ObservableCollection<Models.Order>(orderList);
+
+                
                 ApplyHistoryFilter();
             }
         }
@@ -155,7 +163,13 @@ namespace WarehouseManager.ViewModels
         public RelayCommand ClearHistoryFilterCommand => new RelayCommand(o => HistoryDateFilter = null);
         private void ApplyFilter()
         {
-            if (string.IsNullOrWhiteSpace(SearchText))
+            
+            if (_allProducts == null) return;
+
+            
+            string search = SearchText?.ToLower() ?? "";
+
+            if (string.IsNullOrWhiteSpace(search))
             {
                 Products = new ObservableCollection<Product>(_allProducts);
             }
@@ -163,14 +177,17 @@ namespace WarehouseManager.ViewModels
             {
                 
                 Products = new ObservableCollection<Product>(_allProducts.Where(p =>
-                    p.Name.ToLower().Contains(SearchText.ToLower()) ||
-                    p.SKU.ToLower().Contains(SearchText.ToLower())));
+                    (p.Name != null && p.Name.ToLower().Contains(search)) ||
+                    (p.SKU != null && p.SKU.ToLower().Contains(search))));
             }
+
             OnPropertyChanged(nameof(Products));
-            OnPropertyChanged(nameof(TotalProductsCount));
-            OnPropertyChanged(nameof(TotalInventoryValue));
-            OnPropertyChanged(nameof(LowStockCount));
-            OnPropertyChanged(nameof(LowStockProducts));
+
+           
+            OnPropertyChanged("TotalProductsCount");
+            OnPropertyChanged("TotalInventoryValue");
+            OnPropertyChanged("LowStockCount");
+            OnPropertyChanged("LowStockProducts");
         }
 
         private void OpenAddDialog()
@@ -316,7 +333,7 @@ namespace WarehouseManager.ViewModels
         {
             if (SelectedUser == null) return;
 
-            // Nem veheted el a saját admin jogodat véletlenül!
+            
             if (SelectedUser.Id == Helpers.SessionManager.CurrentUser.Id && newRole == "User")
             {
                 MessageBox.Show("Saját magadtól nem veheted el az Admin jogot!");
@@ -332,7 +349,7 @@ namespace WarehouseManager.ViewModels
                     db.SaveChanges();
                 }
             }
-            LoadUsers(); // Lista frissítése a felületen
+            LoadUsers(); 
         }
         private void Checkout()
         {
@@ -344,7 +361,8 @@ namespace WarehouseManager.ViewModels
                     var newOrder = new Models.Order
                     {
                         OrderDate = System.DateTime.Now,
-                        TotalAmount = CartTotal
+                        TotalAmount = CartTotal,
+                        CashierName = Helpers.SessionManager.CurrentUser?.Username ?? "Ismeretlen"
                     };
                     db.Orders.Add(newOrder);
 

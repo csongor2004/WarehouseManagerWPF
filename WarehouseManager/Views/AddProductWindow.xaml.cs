@@ -15,22 +15,34 @@ namespace WarehouseManager.Views
         {
             try
             {
-                using (var db = new AppDbContext())
+                using (var db = new Data.AppDbContext())
                 {
-                    var p = new Product
+                    
+                    var category = db.Categories.FirstOrDefault();
+                    if (category == null)
+                    {
+                        category = new Models.Category { Name = "Általános" };
+                        db.Categories.Add(category);
+                        db.SaveChanges(); 
+                    }
+
+                    var p = new Models.Product
                     {
                         Name = txtName.Text,
                         SKU = txtSKU.Text,
                         StockLevel = int.Parse(txtStock.Text),
                         Price = decimal.Parse(txtPrice.Text),
-                        CategoryId = 1 // Teszt kategória
+                        CategoryId = category.Id 
                     };
                     db.Products.Add(p);
                     db.SaveChanges();
                 }
                 this.DialogResult = true;
             }
-            catch { MessageBox.Show("Hibás adatok!"); }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show($"Mentési hiba történt: {ex.Message}\nEllenőrizd a számformátumokat!");
+            }
         }
     }
 }

@@ -20,7 +20,7 @@ namespace WarehouseManager.Views
                 return;
             }
 
-            using (var db = new AppDbContext())
+            using (var db = new Data.AppDbContext())
             {
                 if (db.Users.Any(u => u.Username == txtRegUsername.Text))
                 {
@@ -28,11 +28,16 @@ namespace WarehouseManager.Views
                     return;
                 }
 
-                var newUser = new User
+                
+                bool isFirstUser = !db.Users.Any();
+
+                var newUser = new Models.User
                 {
                     Username = txtRegUsername.Text,
-                    PasswordHash = SecurityHelper.HashPassword(txtRegPassword.Password),
-                    Role = "User" 
+                    PasswordHash = Helpers.SecurityHelper.HashPassword(txtRegPassword.Password),
+
+                    
+                    Role = isFirstUser ? "Admin" : "User"
                 };
 
                 db.Users.Add(newUser);

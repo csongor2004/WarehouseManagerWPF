@@ -8,8 +8,8 @@ namespace WarehouseManager.Models
         public int Id { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public decimal TotalAmount { get; set; }
+        public string CashierName { get; set; } = string.Empty;
 
-        
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

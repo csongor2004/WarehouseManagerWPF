@@ -36,7 +36,7 @@
 
             <Border Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" CornerRadius="12" Padding="20" Margin="15,0,0,0">
                 <StackPanel>
-                    <TextBlock Text="Kritikus Készletszint (< 5 db)" Foreground="#EF4444" FontSize="14" FontWeight="SemiBold"/>
+                    <TextBlock Text="Kritikus Készletszint (&lt; 5 db)" Foreground="#EF4444" FontSize="14" FontWeight="SemiBold"/>
                     <TextBlock Text="{Binding LowStockCount}" FontSize="32" FontWeight="Bold" Foreground="#DC2626" Margin="0,5,0,0"/>
                 </StackPanel>
             </Border>
